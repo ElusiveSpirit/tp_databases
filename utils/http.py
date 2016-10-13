@@ -14,6 +14,18 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 
+class DataJSONResponse(JSONResponse):
+    """
+    An success response returns data
+    """
+    def __init__(self, data, **kwargs):
+        content = {
+            'code': s.RESPONSE_CODE_OK,
+            'response': data
+        }
+        super(DataJSONResponse, self).__init__(content, **kwargs)
+
+
 def api_params_require(param_list, method='GET'):
     def decor_wrapper(func):
         def wrapper(request, *args, **kwargs):
@@ -31,6 +43,17 @@ def api_params_require(param_list, method='GET'):
             return func(request, *args, **kwargs)
         return wrapper
     return decor_wrapper
+
+
+def api_post_require(func):
+    def wrapper(request, *args, **kwargs):
+        if request.method != 'POST':
+            return JSONResponse({
+                'code': s.RESPONSE_CODE_INVALID_REQUEST,
+                'response': s.RESPONSE_MSG_INVALID_REQUEST
+            })
+        return func(request, *args, **kwargs)
+    return wrapper
 
 
 def api_get_require(func):

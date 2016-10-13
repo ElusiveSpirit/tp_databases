@@ -9,6 +9,9 @@ ERROR_500_TEMPLATE_NAME = '500.html'
 
 
 def handler_400(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
+    """
+    For wrong request
+    """
     return JSONResponse({
         'code': s.RESPONSE_CODE_INVALID_REQUEST,
         'response': s.RESPONSE_MSG_INVALID_REQUEST
@@ -16,6 +19,9 @@ def handler_400(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
 
 
 def handler_403(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
+    """
+    Wrong params
+    """
     return JSONResponse({
         'code': s.RESPONSE_CODE_NOT_VALID,
         'response': s.RESPONSE_MSG_NOT_VALID
@@ -23,13 +29,19 @@ def handler_403(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
 
 
 def handler_404(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
+    """
+    Not found
+    """
     return JSONResponse({
         'code': s.RESPONSE_CODE_OBJECT_NOT_FOUND,
         'response': s.RESPONSE_MSG_OBJECT_NOT_FOUND
     })
 
 
-def handler_500(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
+def handler_500(request, template_name=ERROR_404_TEMPLATE_NAME):
+    """
+    Server error
+    """
     return JSONResponse({
         'code': s.RESPONSE_CODE_UNEXPECTED_ERROR,
         'response': s.RESPONSE_MSG_UNEXPECTED_ERROR
