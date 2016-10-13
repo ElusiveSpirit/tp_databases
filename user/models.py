@@ -12,5 +12,13 @@ class User(models.Model):
 
     isAnonymous = models.BooleanField(blank=True, default=False)
 
+    following = models.ManyToManyField('self', related_name='followers')
+
+    def get_following_count(self):
+        return self.following.count()
+
+    def get_followers_count(self):
+        return self.followers.count()
+
     def __str__(self):
         return self.email

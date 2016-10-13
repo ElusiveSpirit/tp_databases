@@ -19,11 +19,26 @@ INSTALLED_APPS = [
     'forum',
 ]
 
+# Response codes
+
+RESPONSE_CODE_OK = 0
+RESPONSE_CODE_OBJECT_NOT_FOUND = 1
+RESPONSE_CODE_NOT_VALID = 2
+RESPONSE_CODE_INVALID_REQUEST = 3
+RESPONSE_CODE_UNEXPECTED_ERROR = 4
+RESPONSE_CODE_USER_ALREADY_EXISTS = 5
+
+RESPONSE_MSG_OBJECT_NOT_FOUND = 'Object not found'
+RESPONSE_MSG_NOT_VALID = 'Data is invalid'
+RESPONSE_MSG_INVALID_REQUEST = 'Request is invalid'
+RESPONSE_MSG_UNEXPECTED_ERROR = 'Unxpected error'
+RESPONSE_MSG_USER_ALREADY_EXISTS = 'User already exists'
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
