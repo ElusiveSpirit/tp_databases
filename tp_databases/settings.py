@@ -5,10 +5,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'v2djqhjv=rpc#tcayfc4*snav#dff-p44ni&zaj=7(vnu=qrb4'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    '*'
+]
 
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
@@ -17,6 +18,7 @@ INSTALLED_APPS = [
 
     'user',
     'forum',
+    'utils',
 ]
 
 # Response codes
