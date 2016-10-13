@@ -1,6 +1,5 @@
 from django.db import models
 
-from threads.models import Thread
 from user.models import User
 
 
@@ -8,13 +7,33 @@ class Forum(models.Model):
     """
     Just a forum
     """
+    user = models.ForeignKey(User, related_name='forum_list')
+
     name = models.CharField(max_length=120, unique=True, db_index=True)
     short_name = models.CharField(max_length=60, unique=True, db_index=True)
 
-    user = models.ForeignKey(User, related_name='forum_list')
-
     def __str__(self):
         return self.short_name
+
+
+class Thread(models.Model):
+    """
+    Model for forum thread
+    """
+    forum = models.ForeignKey(Forum, related_name='thread_list')
+    user = models.ForeignKey(User, related_name='thread_list')
+
+    title = models.CharField(max_length=120)
+    message = models.TextField()
+    slug = models.CharField(max_length=40, unique=True)
+
+    isClosed = models.BooleanField()
+    isDeleted = models.BooleanField(blank=True, default=False)
+
+    date = models.DateTimeField()
+
+    def __str__(self):
+        return self.slug
 
 
 class Post(models.Model):
@@ -22,11 +41,9 @@ class Post(models.Model):
     Post in forum
     """
     user = models.ForeignKey(User)
-    forum = models.ForeignKey(Forum)
     thread = models.ForeignKey(Thread)
 
     message = models.TextField()
-
     date = models.DateTimeField()
 
     # Optional
