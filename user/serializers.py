@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from .models import User
@@ -8,10 +9,25 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'name', 'about', 'isAnonymous')
 
-    def is_exists(self):
-        print(self.validated_data)
-        try:
-            User.objects.get(email=self.validated_data['email'])
-        except User.DoesNotExist:
-            return False
-        return True
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    following = serializers.StringRelatedField(many=True)
+    followers = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'name', 'about', 'isAnonymous',
+                  'following', 'followers')
+
+
+class UserFollowSerializer(serializers.Serializer):
+    follower = serializers.EmailField()
+    followee = serializers.EmailField()
+
+    def save(self):
+        follower = get_object_or_404(User, email=self.validated_data.get('follower'))
+        followee = get_object_or_404(User, email=self.validated_data.get('followee'))
+
+        follower.following.add(followee)
+
+        return follower

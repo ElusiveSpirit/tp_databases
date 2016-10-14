@@ -12,7 +12,7 @@ class User(models.Model):
 
     isAnonymous = models.BooleanField(blank=True, default=False)
 
-    following = models.ManyToManyField('self', related_name='followers')
+    following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
 
     def get_following_count(self):
         return self.following.count()
