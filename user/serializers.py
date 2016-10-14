@@ -31,3 +31,11 @@ class UserFollowSerializer(serializers.Serializer):
         follower.following.add(followee)
 
         return follower
+
+    def remove(self):
+        follower = get_object_or_404(User, email=self.validated_data.get('follower'))
+        followee = get_object_or_404(User, email=self.validated_data.get('followee'))
+
+        follower.following.remove(followee)
+
+        return follower

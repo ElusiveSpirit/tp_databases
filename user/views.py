@@ -17,11 +17,17 @@ SORT_ORDERS = {
 
 
 @api_post_require
-def follow_user(request):
+def follow_user(request, type):
+    """
+    Follow or unfollow user
+    """
     data = parse_json_or_error(request)
     serializer = UserFollowSerializer(data=data)
     if serializer.is_valid():
-        user = serializer.save()
+        if type == 'un':
+            user = serializer.remove()
+        else:
+            user = serializer.save()
         serializer = UserDetailSerializer(user)
         return DataJSONResponse(serializer.data)
     else:
@@ -31,6 +37,9 @@ def follow_user(request):
 @api_get_require
 @api_params_require(param_list=['user'])
 def get_user_followers_list(request, type):
+    """
+    Returns user following or followers list
+    """
     user = get_object_or_404(User, email=request.GET.get('user'))
     if type == 'listFollowers':
         followers_list = user.followers.all()
