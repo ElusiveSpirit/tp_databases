@@ -7,7 +7,8 @@ from utils.utils import parse_json_or_error
 from utils.http import (DataJSONResponse, api_params_require, api_get_require, api_post_require,
                         JSONResponse)
 
-from .serializers import UserSerializer, UserDetailSerializer, UserFollowSerializer
+from .serializers import (UserSerializer, UserDetailSerializer, UserFollowSerializer,
+                          UserUpdateSerializer)
 from .models import User
 
 SORT_ORDERS = {
@@ -80,6 +81,19 @@ def create_user(request):
         serializer.save()
         return DataJSONResponse(serializer.data)
     else:
+        raise PermissionDenied()
+
+
+@api_post_require
+def update_profile(request):
+    data = parse_json_or_error(request)
+    serializer = UserUpdateSerializer(data=data)
+    if serializer.is_valid():
+        user = serializer.save()
+        serializer = UserDetailSerializer(user)
+        return DataJSONResponse(serializer.data)
+    else:
+        print(serializer.errors)
         raise PermissionDenied()
 
 

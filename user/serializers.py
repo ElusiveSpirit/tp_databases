@@ -20,6 +20,19 @@ class UserDetailSerializer(serializers.ModelSerializer):
                   'following', 'followers')
 
 
+class UserUpdateSerializer(serializers.Serializer):
+    user = serializers.EmailField()
+    about = serializers.CharField()
+    name = serializers.CharField(max_length=40)
+
+    def save(self):
+        user = get_object_or_404(User, email=self.validated_data.get('user'))
+        user.about = self.validated_data.get('about')
+        user.name = self.validated_data.get('name')
+        user.save()
+        return user
+
+
 class UserFollowSerializer(serializers.Serializer):
     follower = serializers.EmailField()
     followee = serializers.EmailField()

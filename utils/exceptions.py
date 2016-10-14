@@ -24,6 +24,7 @@ def handler_403(request, exception, template_name=ERROR_404_TEMPLATE_NAME):
 
     Raised by PermissionDenied
     """
+    print(exception)
     return JSONResponse({
         'code': s.RESPONSE_CODE_NOT_VALID,
         'response': s.RESPONSE_MSG_NOT_VALID
