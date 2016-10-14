@@ -1,8 +1,10 @@
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
 
 from tp_databases.settings import (RESPONSE_CODE_USER_ALREADY_EXISTS,
                                    RESPONSE_MSG_USER_ALREADY_EXISTS)
+from utils.views import BaseListView
 from utils.utils import parse_json_or_error
 from utils.http import (DataJSONResponse, api_params_require, api_get_require, api_post_require,
                         JSONResponse)
@@ -35,32 +37,18 @@ def follow_user(request, type):
         raise PermissionDenied()
 
 
-@api_get_require
-@api_params_require(param_list=['user'])
-def get_user_followers_list(request, type):
-    """
-    Returns user following or followers list
-    """
-    user = get_object_or_404(User, email=request.GET.get('user'))
-    if type == 'listFollowers':
-        followers_list = user.followers.all()
-    else:
-        followers_list = user.following.all()
+@method_decorator(api_params_require(param_list=['user']), name='get')
+class UserFollowListView(BaseListView):
+    since_param_name = 'since_id'
+    serializer_class = UserDetailSerializer
 
-    if 'order' in request.GET:
-        if request.GET.get('order') not in SORT_ORDERS:
-            raise SuspiciousOperation()
-        followers_list = followers_list.order_by(SORT_ORDERS[request.GET.get('order')])
-
-    try:
-        since_id = int(request.GET.get('since_id', 0))
-        limit = int(request.GET.get('limit', -1))
-        max_id = since_id + limit if limit != -1 else None
-    except TypeError:
-        raise SuspiciousOperation()
-
-    serializer = UserDetailSerializer(followers_list[since_id:max_id], many=True)
-    return DataJSONResponse(serializer.data)
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User, email=self.request.GET.get('user'))
+        if kwargs['type'] == 'listFollowers':
+            self.queryset = user.followers.all()
+        else:
+            self.queryset = user.following.all()
+        return super(UserFollowListView, self).get(request, *args, **kwargs)
 
 
 @api_post_require
@@ -85,7 +73,7 @@ def create_user(request):
 
 
 @api_post_require
-def update_profile(request):
+def update_user(request):
     data = parse_json_or_error(request)
     serializer = UserUpdateSerializer(data=data)
     if serializer.is_valid():
