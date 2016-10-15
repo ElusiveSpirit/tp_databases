@@ -16,47 +16,56 @@ class BaseListView(View):
     _ORDER_WAY_LIST = ['asc', 'desc']
 
     since = None
-    max = None
+    since_field_name = None
+
+    limit = None
 
     def get_since(self):
         """
-        Get first number of element
+        Returns kwarg for filter method
         """
         if self.since is not None:
             return self.since
-        try:
-            self.since = int(self.request.GET.get(self.since_param_name, 0))
-        except TypeError:
-            raise SuspiciousOperation()
-        return self.since
 
-    def get_max(self):
+        if (self.since_field_name is not None and
+                self.since_param_name in self.request.GET):
+            key = '{}__gt'.format(self.since_field_name)
+            self.since = {
+                key: self.request.GET[self.since_param_name]
+            }
+            return self.since
+
+    def get_limit(self):
         """
-        Get last number of element
+        Get limit for elements
         """
-        if self.max is not None:
-            return self.max
-        try:
-            limit = int(self.request.GET.get(self.limit_param_name, -1))
-            self.max = self.get_since() + limit if limit != -1 else None
-        except TypeError:
-            raise SuspiciousOperation()
-        return self.max
+        if self.limit is not None:
+            return self.limit
+
+        if self.limit_param_name in self.request.GET:
+            try:
+                self.limit = int(self.request.GET.get(self.limit_param_name))
+            except TypeError:
+                raise SuspiciousOperation()
+            return self.limit
 
     def get_object_list(self):
         """
         Returns an object list
         """
         qs = self.get_filtered_queryset()
-        if self.get_max() is not None:
-            return qs[self.get_since():self.get_max()]
-        return qs[self.get_since():]
+        if self.get_limit() is not None:
+            return qs[:self.get_limit()]
+        return qs
 
     def get_filtered_queryset(self):
         """
         Set order for queryset by default
         """
         qs = self.get_queryset()
+
+        if self.get_since() is not None:
+            qs = qs.filter(**self.get_since())
 
         if self.order_field is not None:
             order_field = self.order_field if self.order_field[0] != '-' else self.order_field[1:]

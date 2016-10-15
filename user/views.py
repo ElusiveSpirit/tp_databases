@@ -8,6 +8,7 @@ from utils.views import BaseListView
 from utils.utils import parse_json_or_error
 from utils.http import (DataJSONResponse, api_params_require, api_get_require, api_post_require,
                         JSONResponse)
+from forum.serializers import PostSerializer
 
 from .serializers import (UserSerializer, UserDetailSerializer, UserFollowSerializer,
                           UserUpdateSerializer)
@@ -40,6 +41,7 @@ def follow_user(request, type):
 @method_decorator(api_params_require(param_list=['user']), name='get')
 class UserFollowListView(BaseListView):
     since_param_name = 'since_id'
+    since_field_name = 'pk'
     serializer_class = UserDetailSerializer
 
     def get(self, request, *args, **kwargs):
@@ -48,6 +50,17 @@ class UserFollowListView(BaseListView):
             self.queryset = user.followers.all()
         else:
             self.queryset = user.following.all()
+        return super(UserFollowListView, self).get(request, *args, **kwargs)
+
+
+@method_decorator(api_params_require(param_list=['user']), name='get')
+class UserPostListView(BaseListView):
+    serializer_class = PostSerializer
+    since_field_name = 'date'
+
+    def get(self, request, *args, **kwargs):
+        user = get_object_or_404(User, email=self.request.GET.get('user'))
+        self.queryset = user.post_set.all()
         return super(UserFollowListView, self).get(request, *args, **kwargs)
 
 
