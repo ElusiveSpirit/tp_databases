@@ -12,11 +12,15 @@ class BaseView(View):
     NOT_VALID = PermissionDenied
     INVALID_REQUEST = SuspiciousOperation
 
-    def get_response_data(self, data={}):
+    serializer_class = None
+
+    response_data = {}
+
+    def get_response_data(self):
         """
         Returns data for response
         """
-        return data
+        return response_data
 
     def get(self, request, *args, **kwargs):
         return DataJSONResponse(self.get_response_data())
@@ -29,7 +33,6 @@ class BaseView(View):
 
 
 class UpdateView(BaseView):
-    serializer_class = None
 
     def post(self, request, *args, **kwargs):
         try:
@@ -38,13 +41,13 @@ class UpdateView(BaseView):
             self.error(BaseView.NOT_VALID)
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
-            response = self.serializer_valid()
+            return self.serializer_valid()
         else:
-            response = self.serializer_not_valid()
-        return super(UpdateView, self).post(request, *args, **kwargs)
+            return self.serializer_not_valid()
 
     def serializer_valid(self, serializer):
-        pass
+
+        return DataJSONResponse(self.get_response_data())
 
     def serializer_not_valid(self, serializer):
         self.error(BaseView.NOT_VALID)
