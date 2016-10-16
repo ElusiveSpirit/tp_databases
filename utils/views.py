@@ -1,8 +1,54 @@
 from django.views.generic.base import View
-from django.core.exceptions import SuspiciousOperation
+from django.http import Http404
+from django.core.exceptions import SuspiciousOperation, PermissionDenied
+from rest_framework.parsers import JSONParser
 
 from .http import JSONResponse, DataJSONResponse
 from tp_databases import settings as s
+
+
+class BaseView(View):
+    OBJECT_NOT_FOUND = Http404
+    NOT_VALID = PermissionDenied
+    INVALID_REQUEST = SuspiciousOperation
+
+    def get_response_data(self, data={}):
+        """
+        Returns data for response
+        """
+        return data
+
+    def get(self, request, *args, **kwargs):
+        return DataJSONResponse(self.get_response_data())
+
+    def post(self, request, *args, **kwargs):
+        return DataJSONResponse(self.get_response_data())
+
+    def error(self, error=INVALID_REQUEST, msg=''):
+        raise error(msg)
+
+
+class UpdateView(BaseView):
+    serializer_class = None
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = JSONParser().parse(request)
+        except:
+            self.error(BaseView.NOT_VALID)
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            response = self.serializer_valid()
+        else:
+            response = self.serializer_not_valid()
+        return super(UpdateView, self).post(request, *args, **kwargs)
+
+    def serializer_valid(self, serializer):
+        pass
+
+    def serializer_not_valid(self, serializer):
+        self.error(BaseView.NOT_VALID)
+
 
 class BaseListView(View):
     http_method_names = ['get']
