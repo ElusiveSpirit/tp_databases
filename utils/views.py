@@ -12,8 +12,6 @@ class BaseView(View):
     NOT_VALID = PermissionDenied
     INVALID_REQUEST = SuspiciousOperation
 
-    serializer_class = None
-
     response_data = {}
 
     def get_response_data(self):
@@ -32,22 +30,67 @@ class BaseView(View):
         raise error(msg)
 
 
+class DetailView(BaseView):
+    http_method_names = ['get']
+    field_name = None
+    param_name = None
+
+    serializer = None
+    model = None
+
+    def get_serializer(self):
+        return self.serializer
+
+    def get_object_qs(self):
+        qs = self.model.objects.all()
+
+        qs = qs.filter(**{
+            self.field_name: self.request.GET[self.param_name]
+        })
+
+        return qs
+
+    def get_serializer_kwargs(self):
+        return {}
+
+    def get_response_data(self):
+        obj = self.get_object_qs().first()
+        if obj is not None:
+            return self.get_serializer()(obj, **self.get_serializer_kwargs()).data
+        else:
+            self.error(error=BaseView.OBJECT_NOT_FOUND)
+
+    def get(self, request, *args, **kwargs):
+        if self.param_name not in self.request.GET:
+            self.error()
+
+        return super(DetailView, self).get(request, *args, **kwargs)
+
+
 class UpdateView(BaseView):
+    serializer_class = None
+    instance = None
+
+    def get_instance(self):
+        return self.instance
 
     def post(self, request, *args, **kwargs):
         try:
-            data = JSONParser().parse(request)
+            data = JSONParser().parse(self.request)
         except:
             self.error(BaseView.NOT_VALID)
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid():
-            return self.serializer_valid()
+
+        if self.get_instance() is not None:
+            serializer = self.serializer_class(self.get_instance(), data=data)
         else:
-            return self.serializer_not_valid()
+            serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            return self.serializer_valid(serializer)
+        else:
+            return self.serializer_not_valid(serializer)
 
     def serializer_valid(self, serializer):
-
-        return DataJSONResponse(self.get_response_data())
+        return DataJSONResponse(serializer.data)
 
     def serializer_not_valid(self, serializer):
         self.error(BaseView.NOT_VALID)

@@ -38,7 +38,6 @@ RESPONSE_MSG_USER_ALREADY_EXISTS = 'User already exists'
 
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

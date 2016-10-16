@@ -4,7 +4,7 @@ from django.utils.decorators import method_decorator
 
 from tp_databases.settings import (RESPONSE_CODE_USER_ALREADY_EXISTS,
                                    RESPONSE_MSG_USER_ALREADY_EXISTS)
-from utils.views import BaseListView
+from utils.views import BaseListView, BaseView, UpdateView
 from utils.utils import parse_json_or_error
 from utils.http import (DataJSONResponse, api_params_require, api_get_require, api_post_require,
                         JSONResponse)
