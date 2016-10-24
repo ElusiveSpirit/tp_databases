@@ -36,16 +36,6 @@ class ForumDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'short_name')
 
 
-class PostSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-    forum = serializers.StringRelatedField()
-
-    class Meta:
-        model = Post
-        fields = ('id', 'date', 'forum', 'isApproved', 'isDeleted', 'isEdited', 'isHighlighted',
-                  'isSpam', 'message', 'parent', 'thread', 'user')
-
-
 class ThreadSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
     forum = serializers.StringRelatedField()
@@ -54,3 +44,29 @@ class ThreadSerializer(serializers.ModelSerializer):
         model = Thread
         fields = ('id', 'date', 'forum', 'isClosed', 'isDeleted',
                   'message', 'slug', 'title', 'user')
+
+
+class PostSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    thread = serializers.StringRelatedField()
+    forum = serializers.StringRelatedField()
+
+    class Meta:
+        model = Post
+        fields = ('id', 'date', 'forum', 'isApproved', 'isDeleted', 'isEdited', 'isHighlighted',
+                  'isSpam', 'message', 'parent', 'thread', 'user')
+
+    def __init__(self, *args, **kwargs):
+        if 'related' in kwargs:
+            if 'user' in kwargs.get('related'):
+                self.fields['user'] = UserSerializer()
+
+            if 'thread' in kwargs.get('related'):
+                self.fields['thread'] = ThreadSerializer()
+
+            if 'forum' in kwargs.get('related'):
+                self.fields['forum'] = ForumSerializer()
+
+            del kwargs['related']
+
+        return super(ForumDetailSerializer, self).__init__(*args, **kwargs)

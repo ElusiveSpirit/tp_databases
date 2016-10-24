@@ -43,6 +43,10 @@ class Post(models.Model):
     user = models.ForeignKey(User)
     thread = models.ForeignKey(Thread)
 
+    @property
+    def forum(self):
+        return self.thread.forum
+
     message = models.TextField()
     date = models.DateTimeField()
 
